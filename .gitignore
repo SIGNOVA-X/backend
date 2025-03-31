@@ -1,2 +1,3 @@
 .venv
 spoken-to-signed-translation/
+.env

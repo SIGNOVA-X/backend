@@ -2,6 +2,10 @@ from flask import Flask, request, send_file
 import subprocess
 import os
 from flask_cors import CORS
+import requests
+import dotenv
+
+dotenv.load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 CORS(app)
@@ -50,9 +54,27 @@ def translate():
 
     visualizer = PoseVisualizer(pose)
     visualizer.save_gif(gif_file, visualizer.draw())
-
+    print("GIF saved to:", gif_file)
+    # Upload the GIF to IPFS
+   
+    
+    url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
+    print("printing api key: ",os.getenv("PINATA_API_KEY"))
+    headers = {
+        "pinata_api_key": os.getenv("PINATA_API_KEY"),  # Load from .env
+        "pinata_secret_api_key": os.getenv("PINATA_SECRET_API_KEY")  # Load from .env
+    }
+    # Open your file in binary mode
+    with open("output.gif", "rb") as file:
+        files = {"file": file}
+        response = requests.post(url, headers=headers, files=files)
     # Serve the GIF file
-    return send_file(gif_file, mimetype='image/gif')
+    if response.status_code == 200:
+     print("Upload successful:", response.json())
+     return response.json(),200
+    else:
+     print("Upload failed:", response.text)
+     return {'error': 'Upload failed', 'details': response.text}, 500
 
 if __name__ == '__main__':
     app.run(port=5002)
