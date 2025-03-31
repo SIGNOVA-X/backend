@@ -1,3 +1,8 @@
 flask
+<<<<<<< HEAD
 opencv-python
 pillow
+=======
+pillow
+opencv-python
+>>>>>>> temp-branch
