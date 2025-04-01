@@ -78,8 +78,9 @@ def translate():
     else:
      print("Upload failed:", response.text)
      return {'error': 'Upload failed', 'details': response.text}, 500
+ 
 
-@app.route('/covert-image', methods=['POST'])
+@app.route('/convert-image', methods=['POST'])
 def convert_video_to_images():
     """
     Downloads a video/GIF from a URL and converts it into a series of images.
@@ -113,6 +114,8 @@ def convert_video_to_images():
     finally:
         # Clean up the temporary video file
         os.remove(video_file)
+        
+# Profile recommendation endpoint
 
 if __name__ == '__main__':
     app.run(port=5002)
