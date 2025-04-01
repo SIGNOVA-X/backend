@@ -4,8 +4,11 @@ import os
 from flask_cors import CORS
 import requests
 import dotenv
+from PIL import Image
+import imageio
+import shutil
 
-dotenv.load_dotenv()  # Load environment variables from .env file
+dotenv.load_dotenv()  
 
 app = Flask(__name__)
 CORS(app)
@@ -75,6 +78,41 @@ def translate():
     else:
      print("Upload failed:", response.text)
      return {'error': 'Upload failed', 'details': response.text}, 500
+
+@app.route('/covert-image', methods=['POST'])
+def convert_video_to_images():
+    """
+    Downloads a video/GIF from a URL and converts it into a series of images.
+    """
+    data = request.json
+    url = data.get('url', '')
+    # Download the file
+    response = requests.get(url, stream=True)
+    if response.status_code != 200:
+        return {'error': 'Failed to download file', 'details': response.text}, 500
+
+    # Save the downloaded file locally
+    video_file = 'temp_video.gif'
+    with open(video_file, 'wb') as f:
+        shutil.copyfileobj(response.raw, f)
+
+    # Convert the video/GIF into images
+    images_dir = 'output_images'
+    os.makedirs(images_dir, exist_ok=True)
+
+    try:
+        reader = imageio.get_reader(video_file)
+        for i, frame in enumerate(reader):
+            image_path = os.path.join(images_dir, f'frame_{i:03d}.png')
+            image = Image.fromarray(frame)
+            image.save(image_path)
+        print(f"Frames saved to {images_dir}")
+        return {'message': 'Frames extracted successfully', 'frames_dir': images_dir}, 200
+    except Exception as e:
+        return {'error': 'Failed to process video', 'details': str(e)}, 500
+    finally:
+        # Clean up the temporary video file
+        os.remove(video_file)
 
 if __name__ == '__main__':
     app.run(port=5002)
