@@ -7,7 +7,7 @@ import dotenv
 from PIL import Image
 import imageio
 import shutil
-
+from recommender import SimpleProfileRecommender 
 dotenv.load_dotenv()  
 
 app = Flask(__name__)
@@ -116,6 +116,17 @@ def convert_video_to_images():
         os.remove(video_file)
         
 # Profile recommendation endpoint
+recommender = SimpleProfileRecommender('data.json')
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    data = request.json
+    username = data.get('username', '')
+    if not username:
+        return {'error': 'Username is required'}, 400
+    
+    recommendations = recommender.get_recommendations(username)
+    return {'recommended_users': recommendations}, 200
+
 
 if __name__ == '__main__':
     app.run(port=5002)
