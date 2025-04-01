@@ -1,5 +1,5 @@
 .venv
+output_images/
 spoken-to-signed-translation/
 .env
 output.gif
-output_images/
