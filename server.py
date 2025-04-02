@@ -115,6 +115,17 @@ def convert_video_to_images():
         # Clean up the temporary video file
         os.remove(video_file)
         
+@app.route('/get-gif', methods=['GET'])
+def get_gif():
+    """
+    Serves the generated GIF file.
+    """
+    gif_file = 'output.gif'
+    if os.path.exists(gif_file):
+        return send_file(gif_file, mimetype='image/gif')
+    else:
+        return {'error': 'GIF file not found'}, 404
+
 # Profile recommendation endpoint
 recommender = SimpleProfileRecommender('data.json')
 @app.route('/recommend', methods=['POST'])
