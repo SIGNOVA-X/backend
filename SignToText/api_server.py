@@ -18,7 +18,7 @@ app = Flask(__name__)
 # Initialize hand detector and model
 hd = HandDetector(maxHands=1, detectionCon=0.8, minTrackCon=0.5)
 hd2 = HandDetector(maxHands=1, detectionCon=0.8, minTrackCon=0.5)
-model = load_model('cnn8grps_rad1_model.h5')
+model = load_model('SignToText/cnn8grps_rad1_model.h5')
 offset = 29
 
 def distance(x, y):
@@ -374,7 +374,82 @@ def predict_gesture(test_image, pts):
 
     return ch1
 
-@app.route('/predict', methods=['POST'])
+def predict_from_file(image_path):
+    """
+    Predicts the sign language for a given image file.
+    """
+    try:
+        # Read and process the image
+        frame = cv2.imread(image_path)
+        if frame is None:
+            return {'error': 'Could not read image file'}
+        if frame.size == 0:
+            return {'error': 'Empty image file'}
+        if len(frame.shape) == 2:  # If grayscale
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+
+        cv2image = cv2.flip(frame, 1)
+
+        hands, img = hd.findHands(cv2image, draw=False, flipType=True)
+
+        if not hands:
+            return {'prediction': 'No hand detected'}
+
+        hand = hands[0]
+        x, y, w, h = hand['bbox']
+        image = cv2image[y - offset:y + h + offset, x - offset:x + w + offset]
+
+        # Create white background
+        white = np.ones((400, 400, 3), np.uint8) * 255
+
+        handz, img = hd2.findHands(image, draw=False, flipType=True)
+        if not handz:
+            return {'prediction': 'Hand not properly detected'}
+
+        hand = handz[0]
+        pts = hand['lmList']
+
+        offset_x = ((400 - w) // 2) - 15
+        offset_y = ((400 - h) // 2) - 15
+
+        # Draw hand landmarks on white image
+        for t in range(0, 4, 1):
+            cv2.line(white, (pts[t][0] + offset_x, pts[t][1] + offset_y), (pts[t + 1][0] + offset_x, pts[t + 1][1] + offset_y),
+                     (0, 255, 0), 3)
+        for t in range(5, 8, 1):
+            cv2.line(white, (pts[t][0] + offset_x, pts[t][1] + offset_y), (pts[t + 1][0] + offset_x, pts[t + 1][1] + offset_y),
+                     (0, 255, 0), 3)
+        for t in range(9, 12, 1):
+            cv2.line(white, (pts[t][0] + offset_x, pts[t][1] + offset_y), (pts[t + 1][0] + offset_x, pts[t + 1][1] + offset_y),
+                     (0, 255, 0), 3)
+        for t in range(13, 16, 1):
+            cv2.line(white, (pts[t][0] + offset_x, pts[t][1] + offset_y), (pts[t + 1][0] + offset_x, pts[t + 1][1] + offset_y),
+                     (0, 255, 0), 3)
+        for t in range(17, 20, 1):
+            cv2.line(white, (pts[t][0] + offset_x, pts[t][1] + offset_y), (pts[t + 1][0] + offset_x, pts[t + 1][1] + offset_y),
+                     (0, 255, 0), 3)
+        cv2.line(white, (pts[5][0] + offset_x, pts[5][1] + offset_y), (pts[9][0] + offset_x, pts[9][1] + offset_y), (0, 255, 0),
+                 3)
+        cv2.line(white, (pts[9][0] + offset_x, pts[9][1] + offset_y), (pts[13][0] + offset_x, pts[13][1] + offset_y), (0, 255, 0),
+                 3)
+        cv2.line(white, (pts[13][0] + offset_x, pts[13][1] + offset_y), (pts[17][0] + offset_x, pts[17][1] + offset_y),
+                 (0, 255, 0), 3)
+        cv2.line(white, (pts[0][0] + offset_x, pts[0][1] + offset_y), (pts[5][0] + offset_x, pts[5][1] + offset_y), (0, 255, 0),
+                 3)
+        cv2.line(white, (pts[0][0] + offset_x, pts[0][1] + offset_y), (pts[17][0] + offset_x, pts[17][1] + offset_y), (0, 255, 0),
+                 3)
+
+        for i in range(21):
+            cv2.circle(white, (pts[i][0] + offset_x, pts[i][1] + offset_y), 2, (0, 0, 255), 1)
+
+        # Predict the gesture
+        prediction = predict_gesture(white, pts)
+
+        return {'prediction': str(prediction)}
+
+    except Exception as e:
+        return {'error': str(e)}
+
 def predict():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'}), 400
@@ -460,4 +535,4 @@ def predict():
             os.remove(filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5002)

@@ -8,6 +8,7 @@ from PIL import Image
 import imageio
 import shutil
 from recommender import SimpleProfileRecommender 
+from SignToText.api_server import predict_from_file  # Import the predict function
 dotenv.load_dotenv()  
 
 app = Flask(__name__)
@@ -83,37 +84,74 @@ def translate():
 @app.route('/convert-image', methods=['POST'])
 def convert_video_to_images():
     """
-    Downloads a video/GIF from a URL and converts it into a series of images.
+    Converts an uploaded video into a series of images.
     """
-    data = request.json
-    url = data.get('url', '')
-    # Download the file
-    response = requests.get(url, stream=True)
-    if response.status_code != 200:
-        return {'error': 'Failed to download file', 'details': response.text}, 500
-
-    # Save the downloaded file locally
-    video_file = 'temp_video.gif'
-    with open(video_file, 'wb') as f:
-        shutil.copyfileobj(response.raw, f)
-
-    # Convert the video/GIF into images
-    images_dir = 'output_images'
-    os.makedirs(images_dir, exist_ok=True)
-
     try:
-        reader = imageio.get_reader(video_file)
+        if 'video' not in request.files:
+            return {'error': 'No video file provided'}, 400
+
+        video_file = request.files['video']
+        video_path = 'temp_video.mp4'
+        video_file.save(video_path)  # Save the uploaded video locally
+
+        # Convert the video/GIF into images
+        images_dir = 'output_images'
+
+        # Delete the directory if it already exists
+        if os.path.exists(images_dir):
+            shutil.rmtree(images_dir)
+
+        os.makedirs(images_dir, exist_ok=True)
+
+        # Use the ffmpeg plugin explicitly
+        reader = imageio.get_reader(video_path, format='ffmpeg')
+        fps = reader.get_meta_data()['fps']  # Get frames per second
+        frame_interval = int(fps * 4)  # Capture one frame every 4 seconds
+
         for i, frame in enumerate(reader):
-            image_path = os.path.join(images_dir, f'frame_{i:03d}.png')
-            image = Image.fromarray(frame)
-            image.save(image_path)
+            if i % frame_interval == 0:  # Capture frame at the specified interval
+                image_path = os.path.join(images_dir, f'frame_{i:03d}.png')
+                image = Image.fromarray(frame)
+                image.save(image_path)
         print(f"Frames saved to {images_dir}")
         return {'message': 'Frames extracted successfully', 'frames_dir': images_dir}, 200
+
     except Exception as e:
+        print(f"Error processing video: {e}")  # Log the error
         return {'error': 'Failed to process video', 'details': str(e)}, 500
+
     finally:
         # Clean up the temporary video file
-        os.remove(video_file)
+        if os.path.exists(video_path):
+            os.remove(video_path)
+        
+# @app.route('/predict-image', methods=['POST'])  # Change method to POST
+# def predict_image():
+#     """
+#     Predicts the sign language for a given image.
+#     """
+#     return predict()  # Call the predict function directly
+
+@app.route('/predict-all-images', methods=['POST'])
+def predict_all_images():
+    """
+    Predicts the sign language for all images in the output_images directory.
+    """
+    images_dir = 'output_images'
+    if not os.path.exists(images_dir):
+        return {'error': 'output_images directory not found'}, 404
+
+    results = []
+    try:
+        for image_file in sorted(os.listdir(images_dir)):
+            image_path = os.path.join(images_dir, image_file)
+            if os.path.isfile(image_path) and image_file.endswith(('.png', '.jpg', '.jpeg')):
+                result = predict_from_file(image_path)  # Call the refactored predict function
+                results.append({'file': image_file, 'result': result})
+        return {'predictions': results}, 200
+    except Exception as e:
+        print(f"Error predicting images: {e}")
+        return {'error': 'Failed to predict images', 'details': str(e)}, 500
         
 @app.route('/get-gif', methods=['GET'])
 def get_gif():
