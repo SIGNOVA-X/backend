@@ -18,7 +18,7 @@ app = Flask(__name__)
 # Initialize hand detector and model
 hd = HandDetector(maxHands=1, detectionCon=0.8, minTrackCon=0.5)
 hd2 = HandDetector(maxHands=1, detectionCon=0.8, minTrackCon=0.5)
-model = load_model('SignToText/cnn8grps_rad1_model.h5')
+model = load_model('cnn8grps_rad1_model.h5')
 offset = 29
 
 def distance(x, y):

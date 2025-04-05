@@ -30,7 +30,7 @@ flag=False
 suv=0
 #C:\Users\devansh raval\PycharmProjects\pythonProject
 white=np.ones((400,400),np.uint8)*255
-cv2.imwrite("C:\\Users\\devansh raval\\PycharmProjects\\pythonProject\\white.jpg",white)
+cv2.imwrite("C:\Users\Think Pad\desktop\backend\SignToText\white.jpg",white)
 
 
 while True:
@@ -48,8 +48,7 @@ while True:
 
 
 
-            roi = image     #rgb image without drawing
-           # roi1 = image1   #rdb image with drawing
+            roi = image     
 
 
 
