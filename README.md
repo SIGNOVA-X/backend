@@ -137,6 +137,8 @@ Once the hand is detected:
 
 For training, a diverse dataset of hand gestures representing the **English alphabet (A–Z)** was collected, including variations in angles and hand shapes to enhance robustness.
 
+![Hand landmark diagram showing 21 key points labeled from WRIST (0) to PINKY_TIP (20), with red dots and green connecting lines representing finger joints.](assets/hand_Node.png)
+
 ---
 
 ### 🧠 Convolutional Neural Network (CNN)
@@ -149,6 +151,9 @@ A **Convolutional Neural Network (CNN)** forms the core of the sign language cla
 - **Flatten Layer**: Converts multi-dimensional feature maps into a 1D vector.
 - **Dense Layers**: Fully connected layers used for the final classification.
 - **Dropout Layers**: Applied to prevent overfitting during training.
+
+![Convolutional Neural Network architecture showing input image patch, two hidden layers with feature maps, max pooling, and final classification layer with 4 output units.](assets/cnn.png)
+
 
 Unlike traditional neural networks, CNNs:
 - Use 3D neuron arrangements (width, height, depth).
