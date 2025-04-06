@@ -282,13 +282,13 @@ Make sure you have `pip` installed. Then run:
 pip install -r requirements.txt
 ```
 
-###▶️ 4. Run the Backend Server
+### ▶️ 4. Run the Backend Server
 ```bash
 python3.10 server.py
 ```
 If everything is set up correctly, you should see:
 ```bash
- * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Running on http://127.0.0.1:5002/ (Press CTRL+C to quit)
 ```
 To deactivate the virtual environment
 ```bash
