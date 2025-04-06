@@ -209,23 +209,69 @@ Follow these steps to set up and run the SIGNOVA-X Backend locally:
 ### 📥 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/signova-x-backend.git
+git clone https://github.com/SIGNOVA-X/backend.git
 cd backend
 ```
 
+## 🛠️ Environment Setup (.env)
+
+To run the project locally, create a `.env` file in the root directory and add the following environment variables:
+create a account on pinata.cloud and generate the api from here [Pinata](https://pinata.cloud/)
+```env
+# 📦 add your Pinata (IPFS) API Keys
+
+PINATA_API_KEY=""
+PINATA_SECRET_API_KEY=""
+
+```
+Clone the Repository
+
+```bash
+git clone  https://github.com/ZurichNLP/spoken-to-signed-translation
+cd spoken-to-signed-translation
+pip install .
+```
+
+## 🌐 Ngrok Setup for Backend
+
+### 🔧 Step-by-Step Setup
+
+1. **Install Ngrok**
+
+   If you don’t have Ngrok installed, run:
+
+   ```bash
+   # For macOS
+   brew install ngrok/ngrok/ngrok
+   ```
+   ```bash
+   # For Ubuntu/Debian
+   sudo snap install ngrok
+    ```
+   # Or download manually from: https://ngrok.com/download
+
+   ```bash
+   ngrok config add-authtoken <YOUR_AUTH_TOKEN>
+   ```
+   Inside your terminal run:
+
+   ```bash
+    ngrok http 5002
+   ```
+   This will generate a url like this one for you : NGROK_URL="https://<your-id>.ngrok-free.app"
 
 ### 🐍 2. Create and Activate a Virtual Environment
 
 #### 🔹 On macOS/Linux:
 
 ```bash
-python3 -m venv venv
+python3.10 -m venv venv
 source venv/bin/activate
 ```
 #### 🔹 On Windows:
 
 ```bash
-python3 -m venv venv
+python3.10 -m venv venv
 venv/Scripts/activate
 ```
 ### 📦 3. Install Dependencies
@@ -238,7 +284,7 @@ pip install -r requirements.txt
 
 ###▶️ 4. Run the Backend Server
 ```bash
-python server.py
+python3.10 server.py
 ```
 If everything is set up correctly, you should see:
 ```bash
