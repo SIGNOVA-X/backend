@@ -248,7 +248,7 @@ pip install .
    # For Ubuntu/Debian
    sudo snap install ngrok
     ```
-   # Or download manually from: https://ngrok.com/download
+   ### Or download manually from: https://ngrok.com/download
 
    ```bash
    ngrok config add-authtoken <YOUR_AUTH_TOKEN>
